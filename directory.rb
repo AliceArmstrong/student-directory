@@ -1,22 +1,28 @@
+@students = []
+
+def print_menu
+  puts "1. Input the students"
+  puts "2. Show the students"
+  puts "9. Exit"
+end
+
 def interactive_menu
-  students = []
   loop do
-    puts "1. Input the students"
-    puts "2. Show the students"
-    puts "9. Exit"
-    selection = gets.chomp
-    case selection
+    print_menu
+    process(gets.chomp)
+  end
+end
+
+def process(selection)
+  case selection
     when "1"
-      students = input_students
+      input_students
     when "2"
-      print_header
-      print_student_list
-      print_footer(@students)
+      show_students
     when "9"
       exit
     else
       puts "I don't know what you meant, please try again"
-    end
   end
 end
 
@@ -24,7 +30,6 @@ def add_student_info(name, colour, cohort)
   @students << {name: name, colour: colour, cohort: cohort}
 end
 
-@students = []
 def input_students
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
@@ -94,9 +99,10 @@ def print_footer(students)
 end
 
 #@students = input_students
+def show_students
+  print_header
+  print_student_list
+  print_footer(@students)
+end
 
 interactive_menu
-#print_header
-#print(students)
-#print_student_list
-#print_footer(@students)
