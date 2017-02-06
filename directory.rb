@@ -18,22 +18,27 @@ end
 def process(selection)
   case selection
     when "1"
+      success
       input_students
     when "2"
+      success
       show_students
     when "3"
+      success
       save_students
     when "4"
+      success
       load_students
     when "9"
+      success
       exit
     else
       puts "I don't know what you meant, please try again"
   end
 end
 
-def add_student_info(name, colour, cohort)
-  @students << {name: name, colour: colour, cohort: cohort}
+def add_student_info(name, cohort)
+  @students << {name: name, cohort: cohort}
 end
 
 def input_students
@@ -48,10 +53,10 @@ require "Date"
     cohort = STDIN.gets.chomp.capitalize
     if Date::MONTHNAMES.include? cohort
       cohort = cohort.to_sym
-      add_student_info(name, colour, cohort)
+      add_student_info(name, cohort)
     else puts "Please enter a valid month"
       cohort = STDIN.gets.chomp
-      add_student_info(name, colour, cohort)
+      add_student_info(name, cohort)
     end
 
     if @students.count == 1
@@ -134,12 +139,19 @@ def try_load_students
 end
 
 def load_students(filename = "students.csv")
+  if ARGV.empty?
   file = File.open(filename, "r")
   file.readlines.each do |line|
     name, cohort = line.chomp.split(',')
-    @students << {name: name, cohort: cohort.to_sym}
+    add_student_info(name, cohort)
   end
+end
   file.close
 end
 
+def success
+  puts "Action successful"
+end
+
+load_students
 interactive_menu
