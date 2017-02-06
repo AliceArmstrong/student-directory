@@ -1,11 +1,14 @@
 @students = []
+@default_filename = "students.csv"
 
-def print_menu
+def print_menu # Main menu
+  puts "-------------------------"
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save list"
+  puts "4. Load list"
   puts "9. Exit"
+  puts "-------------------------"
 end
 
 def interactive_menu
@@ -24,11 +27,9 @@ def process(selection)
       success
       show_students
     when "3"
-      success
       save_students
     when "4"
-      success
-      load_students
+      menu_load_students
     when "9"
       success
       exit
@@ -51,19 +52,18 @@ require "Date"
     colour = STDIN.gets.chomp.capitalize
     puts "Which cohort is #{name} in?"
     cohort = STDIN.gets.chomp.capitalize
-    if Date::MONTHNAMES.include? cohort
-      cohort = cohort.to_sym
-      add_student_info(name, cohort)
-    else puts "Please enter a valid month"
+    until Date::MONTHNAMES.include? cohort
+      puts "Please enter a valid month"
       cohort = STDIN.gets.chomp
-      add_student_info(name, cohort)
     end
+    cohort = cohort.to_sym
+    add_student_info(name, cohort)
 
     if @students.count == 1
       puts "Now we have #{@students.count} student. Please enter next student or hit return."
     else @students.count > 1
     puts "Now we have #{@students.count} students. Please enter next student or hit return."
-  end
+    end
     name = gets.chomp
   end
   @students
@@ -117,35 +117,54 @@ def show_students
 end
 
 def save_students
-  file = File.open("students.csv", "w")
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
+  puts "Please type name of file to save to (including extension). Blank entry defaults to #{@default_filename}"
+  filename = STDIN.gets.chomp
+  filename = @default_filename if filename.empty?
+  if File.exists?(filename)
+    file = File.open(filename, "w")
+    @students.each { |student|
+      student_data = [student[:name], student[:cohort]]
+      csv_line = student_data.join(",")
+      file.puts csv_line
+    }
+    success
+    file.close
+  else
+    file_error(filename)
+    return
   end
-  file.close
 end
 
-def try_load_students
+def cmd_load_students
   filename = ARGV.first
-  return if filename.nil?
+  filename = @default_filename if filename.nil?
   if File.exists?(filename)
     load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
   else
-    puts "Sorry, #{filename} doesn't exist."
-    exit
+    file_error(filename)
+    return
   end
 end
 
-def load_students(filename = "students.csv")
-  if ARGV.empty?
+def menu_load_students
+  puts "Please type name of file to load from (including extension). Blank entry defaults to #{@default_filename}"
+  filename = STDIN.gets.chomp
+  filename = @default_filename if filename.empty?
+  if File.exists?(filename)
+    load_students(filename)
+  else
+    file_error(filename)
+    return
+  end
+end
+
+def load_students(filename = @default_filename)
   file = File.open(filename, "r")
   file.readlines.each do |line|
     name, cohort = line.chomp.split(',')
     add_student_info(name, cohort)
   end
-end
+    puts "Loaded #{@students.count} from #{filename}"
   file.close
 end
 
@@ -153,5 +172,9 @@ def success
   puts "Action successful"
 end
 
-load_students
+def file_error(filename)
+  puts "Sorry, #{filename} doesn't exist."
+end
+
+cmd_load_students
 interactive_menu
